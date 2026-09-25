@@ -1,0 +1,324 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "rl",
+  "scopeName": "source.rl",
+  "fileTypes": ["rl"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#attributes" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#literals" },
+    { "include": "#match" },
+    { "include": "#functions" },
+    { "include": "#operators" },
+    { "include": "#punctuation" },
+    { "include": "#identifiers" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.documentation.rl",
+          "match": "///.*$"
+        },
+        {
+          "name": "comment.line.double-slash.rl",
+          "match": "//.*$"
+        },
+        { "include": "#block-comment" }
+      ]
+    },
+    "block-comment": {
+      "name": "comment.block.rl",
+      "begin": "/\\*",
+      "end": "\\*/",
+      "patterns": [{ "include": "#block-comment" }]
+    },
+    "attributes": {
+      "patterns": [
+        {
+          "name": "meta.attribute.rl",
+          "begin": "(!#)\\s*(\\[)",
+          "beginCaptures": {
+            "1": { "name": "keyword.operator.bang.rl" },
+            "2": { "name": "punctuation.bracket.rl" }
+          },
+          "end": "(\\])",
+          "endCaptures": {
+            "1": { "name": "punctuation.bracket.rl" }
+          },
+          "patterns": [
+            {
+              "name": "entity.name.tag.rl",
+              "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+            },
+            { "include": "#literals" },
+            { "include": "#punctuation" }
+          ]
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.rl",
+          "match": "\\b(if|else|while|for|in|return|match|break|continue|loop)\\b"
+        },
+        {
+          "name": "keyword.declaration.rl",
+          "match": "\\b(fn|dec|CONST|const|tag|record|impl)\\b"
+        },
+        {
+          "name": "keyword.import.rl",
+          "match": "\\b(get|from)\\b"
+        },
+        {
+          "name": "keyword.operator.logical.rl",
+          "match": "\\b(and|or)\\b"
+        },
+        {
+          "name": "keyword.operator.cast.rl",
+          "match": "\\bas\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "support.type.builtin.rl",
+          "match": "\\b(int|uint|float|bool|string|byte|sbyte|char|error|handle|result)\\b"
+        },
+        {
+          "name": "support.type.container.rl",
+          "match": "\\b(arr|set|map)\\b"
+        },
+        {
+          "name": "support.type.qualifier.rl",
+          "match": "\\b(big|small)\\b"
+        },
+        {
+          "comment": "tag Name { ... } / record Name { ... } declaration name",
+          "match": "\\b(tag|record)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\b",
+          "captures": {
+            "1": { "name": "keyword.declaration.rl" },
+            "2": { "name": "entity.name.type.rl" }
+          }
+        },
+        {
+          "comment": "impl Name { ... } target type",
+          "match": "\\b(impl)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\b",
+          "captures": {
+            "1": { "name": "keyword.declaration.rl" },
+            "2": { "name": "entity.name.type.rl" }
+          }
+        },
+        {
+          "comment": "type in declaration position: dec Type name = ..., CONST Type name = ...",
+          "match": "\\b(dec|CONST)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\b",
+          "captures": {
+            "1": { "name": "keyword.declaration.rl" },
+            "2": { "name": "entity.name.type.rl" }
+          }
+        },
+        {
+          "comment": "arr[Type], set[Type], map[Key, Value] element/key/value types",
+          "match": "\\b(arr|set|map)(\\[)",
+          "captures": {
+            "1": { "name": "support.type.container.rl" },
+            "2": { "name": "punctuation.bracket.rl" }
+          }
+        },
+        {
+          "comment": "result[Type] element type",
+          "match": "\\b(result)(\\[)",
+          "captures": {
+            "1": { "name": "support.type.builtin.rl" },
+            "2": { "name": "punctuation.bracket.rl" }
+          }
+        },
+        {
+          "comment": "PascalCase identifier used as a type name",
+          "name": "entity.name.type.rl",
+          "match": "\\b[A-Z][a-zA-Z0-9_]*\\b(?=\\s*\\{)"
+        },
+        {
+          "comment": "Tag.Variant (variant_pattern / enum-style field access)",
+          "match": "\\b([A-Z][a-zA-Z0-9_]*)(\\.)([a-zA-Z_][a-zA-Z0-9_]*)\\b",
+          "captures": {
+            "1": { "name": "entity.name.type.rl" },
+            "2": { "name": "punctuation.delimiter.rl" },
+            "3": { "name": "variable.other.enummember.rl" }
+          }
+        }
+      ]
+    },
+    "literals": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.rl",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.rl",
+              "match": "\\\\."
+            },
+            {
+              "comment": "unicode escape \\u{HHHH}",
+              "name": "constant.character.escape.rl",
+              "match": "\\\\u\\{[0-9a-fA-F]+\\}"
+            },
+            {
+              "comment": "hex escape \\xHH",
+              "name": "constant.character.escape.rl",
+              "match": "\\\\x[0-9a-fA-F]{1,2}"
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.rl",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.rl",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "constant.numeric.suffix.rl",
+          "match": "\\b[0-9]+\\.[0-9]+(_(f32|f64))?\\b"
+        },
+        {
+          "name": "constant.numeric.suffix.rl",
+          "match": "\\b[0-9]+(_(u8|i8|u16|i16|u32|i32|u64|i64|byte|sbyte|bsbyte|bbyte))?\\b"
+        },
+        {
+          "name": "constant.language.boolean.rl",
+          "match": "\\b(true|false)\\b"
+        },
+        {
+          "name": "constant.language.null.rl",
+          "match": "\\bnull\\b"
+        }
+      ]
+    },
+    "match": {
+      "patterns": [
+        {
+          "name": "constant.language.wildcard.rl",
+          "match": "(?<![a-zA-Z0-9_])_(?![a-zA-Z0-9_])"
+        },
+        {
+          "name": "keyword.operator.arrow.rl",
+          "match": "=>"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.rl",
+          "match": "\\b(fn)\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.declaration.rl" },
+            "2": { "name": "entity.name.function.rl" }
+          }
+        },
+        {
+          "comment": "ok/err builtin result constructors",
+          "name": "support.function.builtin.rl",
+          "match": "\\b(ok|err)\\b(?=\\s*\\()"
+        },
+        {
+          "name": "entity.name.function.call.rl",
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()",
+          "captures": {
+            "1": { "name": "entity.name.function.call.rl" }
+          }
+        },
+        {
+          "name": "entity.name.function.method.rl",
+          "match": "\\.([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()",
+          "captures": {
+            "1": { "name": "entity.name.function.method.rl" }
+          }
+        },
+        {
+          "comment": "field access: expr.field (non-call, non-enum-variant)",
+          "match": "(\\.)([a-z_][a-zA-Z0-9_]*)\\b(?!\\s*\\()",
+          "captures": {
+            "1": { "name": "punctuation.delimiter.rl" },
+            "2": { "name": "variable.other.property.rl" }
+          }
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.comparison.rl",
+          "match": "(==|!=|<=|>=|<|>)"
+        },
+        {
+          "name": "keyword.operator.assignment.rl",
+          "match": "(\\+=|-=|\\*=|/=|=)"
+        },
+        {
+          "name": "keyword.operator.arithmetic.rl",
+          "match": "(\\+|-|\\*|/)"
+        },
+        {
+          "name": "keyword.operator.arrow.rl",
+          "match": "->"
+        },
+        {
+          "name": "keyword.operator.range.rl",
+          "match": "\\.\\."
+        },
+        {
+          "name": "keyword.operator.path.rl",
+          "match": "::"
+        },
+        {
+          "name": "keyword.operator.propagate.rl",
+          "match": "\\?"
+        },
+        {
+          "name": "keyword.operator.bang.rl",
+          "match": "!#|!"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.bracket.rl",
+          "match": "[()\\[\\]{}]"
+        },
+        {
+          "name": "punctuation.separator.rl",
+          "match": ","
+        },
+        {
+          "name": "punctuation.separator.colon.rl",
+          "match": ":"
+        },
+        {
+          "name": "punctuation.delimiter.rl",
+          "match": "\\."
+        }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "variable.other.rl",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    }
+  }
+}
